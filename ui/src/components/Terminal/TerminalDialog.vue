@@ -34,19 +34,9 @@
         </div>
 
         <div class="mt-2" v-if="showLoginForm">
-          <v-tabs align-tabs="center" color="primary" v-model="tabActive">
-            <v-tab value="Password" block data-test="password-tab" @click="resetFieldValidation">Password</v-tab>
-            <v-tab
-              value="PrivateKey"
-              @click="resetFieldValidation"
-              block
-              data-test="private-key-tab"
-            >Private Key</v-tab
-            >
-          </v-tabs>
 
           <v-card-text>
-            <v-window v-model="tabActive">
+            <v-window>
               <v-window-item value="Password">
                 <v-form lazy-validation @submit.prevent="connectWithPassword()">
                   <v-container>
@@ -67,37 +57,57 @@
                     </v-row>
                     <v-row>
                       <v-col>
-                        <v-text-field
-                          color="primary"
-                          :append-inner-icon="
-                            showPassword ? 'mdi-eye' : 'mdi-eye-off'
-                          "
-                          v-model="password"
-                          :error-messages="passwordError"
-                          label="Password"
-                          required
-                          hint="Enter a valid password for the user on the device"
-                          persistent-hint
-                          persistent-placeholder
-                          data-test="password-field"
-                          :type="showPassword ? 'text' : 'password'"
-                          @click:append-inner="showPassword = !showPassword"
+                        <v-select
+                          v-model="authenticationMethod"
+                          :items="['Password', 'PrivateKey']"
+                          label="Authentication method"
                         />
                       </v-col>
-                    </v-row>
+                     </v-row>
+                     <v-row>
+                        <v-col>
+                          <v-select
+                            v-model="privateKey"
+                            v-if="authenticationMethod === 'PrivateKey'"
+                            :items="nameOfPrivateKeys"
+                            item-text="name"
+                            item-value="data"
+                            label="Private Key"
+                            hint="Select a private key file for authentication"
+                            persistent-hint
+                            data-test="privatekeys-select"
+                          />
+                          <v-text-field
+                            color="primary"
+                            :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                            v-model="password"
+                            v-if="authenticationMethod === 'Password'"
+                            :error-messages="passwordError"
+                            label="Password"
+                            required
+                            hint="Enter a valid password for the user on the device"
+                            persistent-hint
+                            persistent-placeholder
+                            data-test="password-field"
+                            :type="showPassword ? 'text' : 'password'"
+                            @click:append-inner="showPassword = !showPassword"
+                          />
+                        </v-col>
+                      </v-row>
                   </v-container>
 
                   <v-card-actions>
                     <v-spacer />
-                    <v-btn
-                      type="submit"
-                      color="primary"
-                      class="mt-4"
-                      variant="flat"
-                      data-test="connect2-btn"
-                    >
-                      Connect
-                    </v-btn>
+                      <v-btn
+                        type="submit"
+                        color="primary"
+                        class="mt-4"
+                        variant="flat"
+                        data-test="connect2-btn"
+                      >
+                        Connect
+                      </v-btn>
+                    <v-spacer />
                   </v-card-actions>
                 </v-form>
               </v-window-item>
@@ -119,20 +129,6 @@
                           persistent-placeholder
                           :validate-on-blur="true"
                           data-test="username-field-pk"
-                        />
-                      </v-col>
-                    </v-row>
-                    <v-row>
-                      <v-col>
-                        <v-select
-                          v-model="privateKey"
-                          :items="nameOfPrivateKeys"
-                          item-text="name"
-                          item-value="data"
-                          label="Private Key"
-                          hint="Select a private key file for authentication"
-                          persistent-hint
-                          data-test="privatekeys-select"
                         />
                       </v-col>
                     </v-row>
@@ -214,7 +210,7 @@ const props = defineProps({
 });
 const store = useStore();
 const route = useRoute();
-const tabActive = ref("Password");
+const authenticationMethod = ref("Password");
 const showPassword = ref(false);
 const showLoginForm = ref(true);
 const privateKey = ref("");
